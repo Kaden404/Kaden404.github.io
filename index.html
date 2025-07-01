@@ -2,44 +2,351 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bird Watching</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Chat Room</title>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --text: #000;
+      --me: #d3f4cb;
+      --them: #e0e0e0;
+      --header: #2f3542;
+      --primary: #2ed573;
+      --online-bg: #ffffff;
+      --dot: #2ed573;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 1rem;
+      background: var(--header);
+      color: white;
+      text-align: center;
+      position: relative;
+    }
+
+    .online-users {
+      background: var(--online-bg);
+      border-bottom: 1px solid #ccc;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .user-pill {
+      background: #eee;
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .user-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dot);
+    }
+
+    .chat {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 70%;
+      margin-bottom: 0.7rem;
+      padding: 0.5rem 1rem;
+      border-radius: 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      white-space: pre-wrap;
+    }
+
+    .me {
+      align-self: flex-end;
+      background: var(--me);
+      text-align: right;
+    }
+
+    .them {
+      align-self: flex-start;
+      background: var(--them);
+    }
+
+    .meta {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      margin-bottom: 2px;
+    }
+
+    .typing {
+      font-size: 0.85rem;
+      font-style: italic;
+      opacity: 0.75;
+      padding: 0.2rem 1rem;
+      display: flex;
+      align-items: center;
+      height: 1.5rem;
+    }
+
+    .dots {
+      display: inline-block;
+      margin-left: 0.4rem;
+    }
+
+    .dots span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin: 0 2px;
+      background: var(--text);
+      border-radius: 50%;
+      animation: blink 1.4s infinite both;
+    }
+
+    .dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes blink {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    form {
+      display: flex;
+      gap: 0.5rem;
+      border-top: 1px solid #ccc;
+      padding: 0.5rem;
+    }
+
+    input, button {
+      padding: 0.7rem;
+      font-size: 1rem;
+    }
+
+    input {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button.send {
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 9999;
+    }
+
+    .overlay-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 300px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .overlay-box input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+
+    .overlay-box button {
+      margin-top: 1rem;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="header-top">
-      <h1>Birdwatching</h1>
-      <img src="logo.png" alt="Bird Watching Logo" />
+
+  <div class="overlay" id="overlay">
+    <div class="overlay-box">
+      <h2>Enter Your Username</h2>
+      <input type="text" id="name-input" placeholder="Username" required />
+      <button onclick="setUsername()">Join Chat</button>
     </div>
-    <nav class="navigation">
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Get Started</a></li>
-        <li><a href="#">Photos</a></li>
-        <li><a href="#">Gear</a></li>
-        <li><a href="#">Forum</a></li>
-      </ul>
-    </nav>
+  </div>
+
+  <header>
+    <h1>Class Chat Room</h1>
   </header>
 
-  <main>
-    <section class="welcome">
-      <h2>Welcome</h2>
-      <p>A bunch of boring stuff</p>
-      <p>Birdwatching is Great</p>
-    </section>
+  <div class="online-users" id="online-users">Online: Loading...</div>
+  <div class="chat" id="chat"></div>
+  <div class="typing" id="typing"></div>
 
-    <section class="photos">
-      <h2>Favorite Photos</h2>
-      <img src="Photo1.jfif" alt="Bird Photo 1" />
-      <img src="photo2.jpg" alt="Bird Photo 2" />
-    </section>
-  </main>
+  <form id="chat-form">
+    <input id="msg" placeholder="Type your message..." required />
+    <button type="submit" class="send">Send</button>
+  </form>
 
-  <footer>
-    <p>This is a fake site</p>
-    <p>Made by me</p>
-  </footer>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
+
+  <!-- Notification Sound -->
+  <audio id="notif-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcxMmLr4OEp31AbN9va2o4vz2EaVNXcHU",
+      authDomain: "chat-room-fd619.firebaseapp.com",
+      databaseURL: "https://chat-room-fd619-default-rtdb.firebaseio.com",
+      projectId: "chat-room-fd619",
+      storageBucket: "chat-room-fd619.firebasestorage.app",
+      messagingSenderId: "193712381688",
+      appId: "1:193712381688:web:b8c185148cd09a80f9250d",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const chat = document.getElementById('chat');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('msg');
+    const overlay = document.getElementById('overlay');
+    const nameInput = document.getElementById('name-input');
+    const typingDiv = document.getElementById('typing');
+    const onlineUsersDiv = document.getElementById('online-users');
+    const notifSound = document.getElementById('notif-sound');
+
+    let currentUsername = "";
+    let typingTimeout;
+
+    // Load username
+    if (localStorage.getItem("username")) {
+      currentUsername = localStorage.getItem("username");
+      overlay.style.display = "none";
+      setPresence();
+    }
+
+    function setUsername() {
+      const name = nameInput.value.trim();
+      if (name) {
+        currentUsername = name;
+        localStorage.setItem("username", name);
+        overlay.style.display = "none";
+        setPresence();
+      }
+    }
+
+    function setPresence() {
+      const userRef = db.ref("presence/" + currentUsername);
+      userRef.set(true);
+      userRef.onDisconnect().remove();
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (text && currentUsername) {
+        const timestamp = Date.now();
+        db.ref('messages').push({ username: currentUsername, text, timestamp });
+        db.ref("typing/" + currentUsername).remove();
+        input.value = '';
+      }
+    });
+
+    input.addEventListener("input", () => {
+      db.ref("typing/" + currentUsername).set(true);
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        db.ref("typing/" + currentUsername).remove();
+      }, 2000);
+    });
+
+    db.ref('messages').on('child_added', (snapshot) => {
+      const { username, text, timestamp } = snapshot.val();
+      const msg = document.createElement('div');
+      msg.className = 'message';
+      msg.classList.add(username === currentUsername ? 'me' : 'them');
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `${username} • ${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+      const body = document.createElement('div');
+      body.textContent = text;
+
+      msg.appendChild(meta);
+      msg.appendChild(body);
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+
+      if (username !== currentUsername) {
+        notifSound.play().catch(() => {});
+      }
+    });
+
+    db.ref("typing").on("value", (snapshot) => {
+      const data = snapshot.val();
+      let typingUsers = [];
+
+      for (let user in data) {
+        if (user !== currentUsername) {
+          typingUsers.push(user);
+        }
+      }
+
+      if (typingUsers.length) {
+        typingDiv.innerHTML = `${typingUsers.join(", ")} is typing <div class="dots"><span></span><span></span><span></span></div>`;
+      } else {
+        typingDiv.innerHTML = "";
+      }
+    });
+
+    db.ref("presence").on("value", (snapshot) => {
+      const data = snapshot.val();
+      const names = data ? Object.keys(data) : [];
+      onlineUsersDiv.innerHTML = names.map(name =>
+        `<div class="user-pill"><span class="user-dot"></span>${name}</div>`
+      ).join("");
+    });
+  </script>
 </body>
 </html>
