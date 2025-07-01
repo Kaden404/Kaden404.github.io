@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat Room</title>
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --text: #000;
+      --me: #dcf8c6;
+      --them: #ececec;
+    }
+
+    body.dark {
+      --bg: #1e1e1e;
+      --text: #fff;
+      --me: #005c4b;
+      --them: #444;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 1rem;
+      background: #2196F3;
+      color: white;
+      text-align: center;
+      position: relative;
+    }
+
+    .toggle {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      background: #444;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .chat {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 70%;
+      margin-bottom: 0.7rem;
+      padding: 0.5rem 1rem;
+      border-radius: 1rem;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      white-space: pre-wrap;
+    }
+
+    .me {
+      align-self: flex-end;
+      background: var(--me);
+      text-align: right;
+    }
+
+    .them {
+      align-self: flex-start;
+      background: var(--them);
+    }
+
+    .meta {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      margin-bottom: 2px;
+    }
+
+    .typing {
+      font-size: 0.8rem;
+      font-style: italic;
+      opacity: 0.7;
+      padding: 0 1rem 0.5rem;
+    }
+
+    form {
+      display: flex;
+      gap: 0.5rem;
+      border-top: 1px solid #ccc;
+      padding: 0.5rem;
+    }
+
+    input, button {
+      padding: 0.7rem;
+      font-size: 1rem;
+    }
+
+    input {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button.send {
+      background: #2196F3;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 9999;
+    }
+
+    .overlay-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 300px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .overlay-box input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+
+    .overlay-box button {
+      margin-top: 1rem;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="overlay" id="overlay">
+    <div class="overlay-box">
+      <h2>Enter Your Username</h2>
+      <input type="text" id="name-input" placeholder="Username" required />
+      <button onclick="setUsername()">Join Chat</button>
+    </div>
+  </div>
+
+  <button class="toggle" onclick="toggleDark()">Toggle Mode</button>
+  <header><h1>Class Chat Room</h1></header>
+
+  <div class="typing" id="typing"></div>
+  <div class="chat" id="chat"></div>
+
+  <form id="chat-form">
+    <input id="msg" placeholder="Type your message... 😀🎉❤️" required />
+    <button type="submit" class="send">Send</button>
+  </form>
+
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcxMmLr4OEp31AbN9va2o4vz2EaVNXcHU",
+      authDomain: "chat-room-fd619.firebaseapp.com",
+      databaseURL: "https://chat-room-fd619-default-rtdb.firebaseio.com",
+      projectId: "chat-room-fd619",
+      storageBucket: "chat-room-fd619.firebasestorage.app",
+      messagingSenderId: "193712381688",
+      appId: "1:193712381688:web:b8c185148cd09a80f9250d",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const chat = document.getElementById('chat');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('msg');
+    const overlay = document.getElementById('overlay');
+    const nameInput = document.getElementById('name-input');
+    const typingDiv = document.getElementById('typing');
+
+    let currentUsername = "";
+    let typingTimeout;
+
+    // Set dark mode from localStorage
+    if (localStorage.getItem("theme") === "dark") {
+      document.body.classList.add("dark");
+    }
+
+    function toggleDark() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    }
+
+    function setUsername() {
+      const name = nameInput.value.trim();
+      if (name) {
+        currentUsername = name;
+        overlay.style.display = "none";
+      }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (text && currentUsername) {
+        const timestamp = Date.now();
+        db.ref('messages').push({ username: currentUsername, text, timestamp });
+        db.ref("typing/" + currentUsername).remove();
+        input.value = '';
+      }
+    });
+
+    input.addEventListener("input", () => {
+      db.ref("typing/" + currentUsername).set(true);
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        db.ref("typing/" + currentUsername).remove();
+      }, 2000);
+    });
+
+    db.ref('messages').on('child_added', (snapshot) => {
+      const { username, text, timestamp } = snapshot.val();
+      const msg = document.createElement('div');
+      msg.className = 'message';
+      msg.classList.add(username === currentUsername ? 'me' : 'them');
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `${username} • ${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+      const body = document.createElement('div');
+      body.textContent = text;
+
+      msg.appendChild(meta);
+      msg.appendChild(body);
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    });
+
+    db.ref("typing").on("value", (snapshot) => {
+      const data = snapshot.val();
+      let typingUsers = [];
+
+      for (let user in data) {
+        if (user !== currentUsername) {
+          typingUsers.push(user);
+        }
+      }
+
+      typingDiv.textContent = typingUsers.length
+        ? typingUsers.join(", ") + " is typing..."
+        : "";
+    });
+  </script>
+</body>
+</html>
