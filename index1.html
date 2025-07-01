@@ -7,15 +7,10 @@
     :root {
       --bg: #f5f5f5;
       --text: #000;
-      --me: #dcf8c6;
-      --them: #ececec;
-    }
-
-    body.dark {
-      --bg: #1e1e1e;
-      --text: #fff;
-      --me: #005c4b;
-      --them: #444;
+      --me: #d3f4cb;
+      --them: #e0e0e0;
+      --header: #2f3542;
+      --primary: #2ed573;
     }
 
     body {
@@ -30,21 +25,19 @@
 
     header {
       padding: 1rem;
-      background: #2196F3;
+      background: var(--header);
       color: white;
       text-align: center;
       position: relative;
     }
 
-    .toggle {
-      position: absolute;
-      right: 1rem;
-      top: 1rem;
-      background: #444;
-      color: white;
-      border: none;
-      padding: 0.5rem;
-      cursor: pointer;
+    .online-users {
+      background: #dedede;
+      color: #222;
+      padding: 0.3rem 1rem;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      white-space: nowrap;
     }
 
     .chat {
@@ -84,10 +77,41 @@
     }
 
     .typing {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-style: italic;
-      opacity: 0.7;
-      padding: 0 1rem 0.5rem;
+      opacity: 0.75;
+      padding: 0.2rem 1rem;
+      display: flex;
+      align-items: center;
+      height: 1.5rem;
+    }
+
+    .dots {
+      display: inline-block;
+      margin-left: 0.4rem;
+    }
+
+    .dots span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin: 0 2px;
+      background: var(--text);
+      border-radius: 50%;
+      animation: blink 1.4s infinite both;
+    }
+
+    .dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes blink {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
     }
 
     form {
@@ -109,7 +133,7 @@
     }
 
     button.send {
-      background: #2196F3;
+      background: var(--primary);
       color: white;
       border: none;
       cursor: pointer;
@@ -148,7 +172,7 @@
       margin-top: 1rem;
       padding: 0.7rem 1.2rem;
       font-size: 1rem;
-      background: #2196F3;
+      background: var(--primary);
       color: white;
       border: none;
       border-radius: 5px;
@@ -166,14 +190,15 @@
     </div>
   </div>
 
-  <button class="toggle" onclick="toggleDark()">Toggle Mode</button>
-  <header><h1>Class Chat Room</h1></header>
-
-  <div class="typing" id="typing"></div>
+  <header>
+    <h1>Class Chat Room</h1>
+  </header>
+  <div class="online-users" id="online-users">Online: Loading...</div>
   <div class="chat" id="chat"></div>
+  <div class="typing" id="typing"></div>
 
   <form id="chat-form">
-    <input id="msg" placeholder="Type your message... 😀🎉❤️" required />
+    <input id="msg" placeholder="Type your message..." required />
     <button type="submit" class="send">Send</button>
   </form>
 
@@ -200,26 +225,32 @@
     const overlay = document.getElementById('overlay');
     const nameInput = document.getElementById('name-input');
     const typingDiv = document.getElementById('typing');
+    const onlineUsersDiv = document.getElementById('online-users');
 
     let currentUsername = "";
     let typingTimeout;
 
-    // Set dark mode from localStorage
-    if (localStorage.getItem("theme") === "dark") {
-      document.body.classList.add("dark");
-    }
-
-    function toggleDark() {
-      document.body.classList.toggle("dark");
-      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    // Load username from localStorage
+    if (localStorage.getItem("username")) {
+      currentUsername = localStorage.getItem("username");
+      overlay.style.display = "none";
+      setPresence();
     }
 
     function setUsername() {
       const name = nameInput.value.trim();
       if (name) {
         currentUsername = name;
+        localStorage.setItem("username", name);
         overlay.style.display = "none";
+        setPresence();
       }
+    }
+
+    function setPresence() {
+      const userRef = db.ref("presence/" + currentUsername);
+      userRef.set(true);
+      userRef.onDisconnect().remove();
     }
 
     form.addEventListener('submit', (e) => {
@@ -270,9 +301,17 @@
         }
       }
 
-      typingDiv.textContent = typingUsers.length
-        ? typingUsers.join(", ") + " is typing..."
-        : "";
+      if (typingUsers.length) {
+        typingDiv.innerHTML = `${typingUsers.join(", ")} is typing <div class="dots"><span></span><span></span><span></span></div>`;
+      } else {
+        typingDiv.innerHTML = "";
+      }
+    });
+
+    db.ref("presence").on("value", (snapshot) => {
+      const data = snapshot.val();
+      const names = data ? Object.keys(data) : [];
+      onlineUsersDiv.textContent = "Online: " + (names.length ? names.join(", ") : "No one");
     });
   </script>
 </body>
