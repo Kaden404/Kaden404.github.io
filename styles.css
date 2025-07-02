@@ -73,6 +73,9 @@ header {
   border-radius: 1rem;
   font-size: 0.92rem;
   display: flex;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
   flex-direction: column;
   white-space: pre-wrap;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
