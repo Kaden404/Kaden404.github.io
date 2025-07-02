@@ -133,7 +133,6 @@ header {
   40% { transform: scale(1); }
 }
 
-/* Reworked Form */
 form {
   display: flex;
   align-items: center;
@@ -177,7 +176,6 @@ button.send:hover {
   background: #1dd167;
 }
 
-/* Overlay (Username Prompt) */
 .overlay {
   display: flex;
   align-items: center;

@@ -23,7 +23,6 @@ const firebaseConfig = {
     let currentUsername = "";
     let typingTimeout;
 
-    // Load username
     if (localStorage.getItem("username")) {
       currentUsername = localStorage.getItem("username");
       overlay.style.display = "none";
@@ -84,7 +83,7 @@ const firebaseConfig = {
       chat.scrollTop = chat.scrollHeight;
 
       if (username !== currentUsername) {
-  notifSound.currentTime = 0; // rewind in case it's playing
+  notifSound.currentTime = 0;
   notifSound.play().catch((err) => {
     console.warn("Audio play failed:", err);
   });
