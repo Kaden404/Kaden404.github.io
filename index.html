@@ -213,7 +213,7 @@
   </div>
 
   <header>
-    <h1>Class Chat Room</h1>
+    <h1>Chat Room</h1>
   </header>
 
   <div class="online-users" id="online-users">Online: Loading...</div>
@@ -224,13 +224,13 @@
     <input id="msg" placeholder="Type your message..." required />
     <button type="submit" class="send">Send</button>
   </form>
+  <audio id="notif-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
 
   <!-- Notification Sound -->
-  <audio id="notif-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <script>
     const firebaseConfig = {
@@ -319,8 +319,11 @@
       chat.scrollTop = chat.scrollHeight;
 
       if (username !== currentUsername) {
-        notifSound.play().catch(() => {});
-      }
+  notifSound.currentTime = 0; // rewind in case it's playing
+  notifSound.play().catch((err) => {
+    console.warn("Audio play failed:", err);
+  });
+}
     });
 
     db.ref("typing").on("value", (snapshot) => {
@@ -350,4 +353,3 @@
   </script>
 </body>
 </html>
- 
