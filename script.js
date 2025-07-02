@@ -1,42 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Chat Room</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-
-  <div class="overlay" id="overlay">
-    <div class="overlay-box">
-      <h2>Enter Your Username</h2>
-      <input type="text" id="name-input" placeholder="Username" required />
-      <button onclick="setUsername()">Join Chat</button>
-    </div>
-  </div>
-
-  <header>
-    <h1>Chat Room</h1>
-  </header>
-
-  <div class="online-users" id="online-users">Online: Loading...</div>
-  <div class="chat" id="chat"></div>
-  <div class="typing" id="typing"></div>
-
-  <form id="chat-form">
-    <input id="msg" placeholder="Type your message..." required />
-    <button type="submit" class="send">Send</button>
-  </form>
-  <audio id="notif-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-database-compat.js"></script>
-
-  <!-- Notification Sound -->
-
-  <script>
-    const firebaseConfig = {
+const firebaseConfig = {
       apiKey: "AIzaSyBcxMmLr4OEp31AbN9va2o4vz2EaVNXcHU",
       authDomain: "chat-room-fd619.firebaseapp.com",
       databaseURL: "https://chat-room-fd619-default-rtdb.firebaseio.com",
@@ -153,6 +115,3 @@
         `<div class="user-pill"><span class="user-dot"></span>${name}</div>`
       ).join("");
     });
-  </script>
-</body>
-</html>
