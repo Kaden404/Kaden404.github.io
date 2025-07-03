@@ -23,7 +23,7 @@ header {
   padding: 1rem 2rem;
   background: var(--header);
   color: white;
-  text-align: left;
+  text-align: center;
   font-size: 1.3rem;
   font-weight: 600;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
