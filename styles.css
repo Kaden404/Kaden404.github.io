@@ -1,18 +1,7 @@
-:root {
-  --bg: #f7f9fb;
-  --text: #1e272e;
-  --me: #d3f4cb;
-  --them: #e5e5ea;
-  --header: #1e272e;
-  --primary: #2ed573;
-  --online-bg: #ffffff;
-  --dot: #2ed573;
-}
-
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  background: #f7f9fb;
+  color: #1e272e;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -21,7 +10,7 @@ body {
 
 header {
   padding: 1rem 2rem;
-  background: var(--header);
+  background: #1e272e;
   color: white;
   text-align: center;
   font-size: 1.3rem;
@@ -30,7 +19,7 @@ header {
 }
 
 .online-users {
-  background: var(--online-bg);
+  background: #ffffff;
   border-bottom: 1px solid #ccc;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
@@ -55,7 +44,7 @@ header {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--dot);
+  background: #2ed573;
 }
 
 .chat {
@@ -83,13 +72,13 @@ header {
 
 .me {
   align-self: flex-end;
-  background: var(--me);
+  background: #d3f4cb;
   text-align: right;
 }
 
 .them {
   align-self: flex-start;
-  background: var(--them);
+  background: #e5e5ea;
 }
 
 .meta {
@@ -117,7 +106,7 @@ header {
   width: 6px;
   height: 6px;
   margin: 0 2px;
-  background: var(--text);
+  background: #1e272e;
   border-radius: 50%;
   animation: blink 1.4s infinite both;
 }
@@ -158,11 +147,11 @@ input {
 }
 
 input:focus {
-  border-color: var(--primary);
+  border-color: #2ed573;
 }
 
 button.send {
-  background: var(--primary);
+  background: #2ed573;
   color: white;
   border: none;
   cursor: pointer;
@@ -215,7 +204,7 @@ button.send:hover {
   margin-top: 1rem;
   padding: 0.7rem 1.2rem;
   font-size: 1rem;
-  background: var(--primary);
+  background: #2ed573;
   color: white;
   border: none;
   border-radius: 8px;
